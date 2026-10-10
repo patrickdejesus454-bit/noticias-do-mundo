@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="pt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#142b4a">
+<meta name="description" content="Leitor de notícias plurais de Moçambique, Angola, Brasil e Estados Unidos.">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.png">
+<title>Notícias do Mundo</title>
+<style>
+:root{--navy:#142b4a;--gold:#e4bd70;--bg:#f4f6f9;--ink:#172033;--muted:#657186;--line:#dce2ea;--card:#fff;--blue:#2459a9}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+header{background:var(--navy);color:#fff;padding:22px 16px 18px;position:sticky;top:0;z-index:3;box-shadow:0 2px 8px #0002}
+.brand{display:flex;gap:12px;align-items:center;max-width:1000px;margin:auto}.logo{width:46px;height:46px;border-radius:13px;background:var(--gold);color:var(--navy);display:grid;place-items:center;font-size:25px;font-weight:900}
+h1{font-size:1.35rem;margin:0}.tagline{font-size:.83rem;color:#d5dfeb;margin-top:3px}
+main{max-width:1000px;margin:auto;padding:16px}.tabs{display:flex;gap:8px;overflow:auto;margin:0 0 14px;padding-bottom:4px}
+button,select,input{font:inherit}button,.tab{border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);padding:10px 13px;cursor:pointer}
+.tab{white-space:nowrap}.tab.active{background:var(--navy);border-color:var(--navy);color:#fff}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:15px;padding:14px;margin-bottom:14px}
+.filters{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.filters label{font-size:.78rem;color:var(--muted);display:block;margin-bottom:5px}
+select,input{width:100%;border:1px solid var(--line);background:#fff;border-radius:9px;padding:10px;color:var(--ink)}
+.section-title{font-size:1.08rem;margin:4px 0 10px}.muted{color:var(--muted);font-size:.88rem}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(245px,1fr));gap:10px}
+.source{background:#fff;border:1px solid var(--line);border-radius:13px;padding:14px;display:flex;flex-direction:column;gap:8px;min-height:155px}.source h3{margin:0;font-size:1rem}.meta{display:flex;gap:5px;flex-wrap:wrap}.pill{font-size:.72rem;padding:3px 7px;border-radius:20px;background:#edf1f6;color:#39465b}.source .actions{display:flex;gap:7px;margin-top:auto}.source .actions a,.linkbtn{font-size:.86rem;text-decoration:none;display:inline-block;padding:8px 10px;border-radius:8px;background:var(--navy);color:white}.source .actions button{padding:7px 9px;font-size:.84rem}
+.news-card{border-bottom:1px solid var(--line);padding:12px 0}.news-card:last-child{border-bottom:0}.news-card h3{font-size:1rem;margin:0 0 5px}.news-card a{color:var(--blue);text-decoration:none}.news-card p{margin:4px 0;color:#4c586b;font-size:.9rem}.news-card small{color:var(--muted)}
+.country-heading{display:flex;align-items:center;gap:8px;margin:16px 0 9px}.country-heading h3{margin:0;font-size:1rem}
+footer{max-width:1000px;margin:auto;padding:0 16px 28px;color:var(--muted);font-size:.78rem}
+.notice{background:#fff8e7;border:1px solid #f1d99c;border-radius:10px;padding:11px;font-size:.85rem;color:#654b17}
+.empty{padding:22px;text-align:center;color:var(--muted)}
+@media(max-width:520px){main{padding:12px}.filters{grid-template-columns:1fr 1fr}.source{min-height:unset}.brand h1{font-size:1.2rem}}
+</style>
+</head>
+<body>
+<header><div class="brand"><div class="logo">NM</div><div><h1>Notícias do Mundo</h1><div class="tagline">Quatro países. Diferentes perspetivas. Uma leitura mais informada.</div></div></div></header>
+<main>
+<div class="tabs" role="tablist">
+<button class="tab active" data-view="inicio">Início</button>
+<button class="tab" data-view="fontes">Jornais e fontes</button>
+<button class="tab" data-view="comparar">Comparar perspetivas</button>
+<button class="tab" data-view="favoritos">Favoritos ★</button>
+</div>
+<section id="inicio" class="view">
+<div class="panel">
+<h2 class="section-title">Explorar por país</h2>
+<div class="grid" id="countryCards"></div>
+</div>
+<div class="panel">
+<h2 class="section-title">Últimas notícias e pesquisas</h2>
+<p class="muted">Escolhe um tema ou fonte para abrir uma pesquisa de notícias atualizada. Os resultados são fornecidos por um serviço externo; os artigos continuam nos sites de origem.</p>
+<div class="filters">
+<div><label for="topic">Tema</label><input id="topic" placeholder="Ex.: eleições, economia"></div>
+<div><label for="topicCountry">País / cobertura</label><select id="topicCountry"><option>Todos os países</option><option>Moçambique</option><option>Angola</option><option>Brasil</option><option>Estados Unidos</option></select></div>
+</div>
+<p><button id="searchNews">Pesquisar notícias ↗</button></p>
+<div class="notice">Nota: esta primeira versão não recolhe nem republica automaticamente artigos protegidos. A pesquisa externa permite consultar títulos e excertos disponíveis; os feeds RSS integrados serão acrescentados quando forem confirmados por cada fonte.</div>
+</div>
+</section>
+<section id="fontes" class="view" hidden>
+<div class="panel">
+<h2 class="section-title">Diretório de fontes</h2>
+<div class="filters">
+<div><label for="countryFilter">País</label><select id="countryFilter"><option>Todos os países</option><option>Moçambique</option><option>Angola</option><option>Brasil</option><option>Estados Unidos</option></select></div>
+<div><label for="orientationFilter">Orientação / perfil</label><select id="orientationFilter"><option>Todas</option><option>Direita / conservadora</option><option>Centro-direita</option><option>Centro / mista</option><option>Centro-esquerda</option><option>Esquerda / progressista</option><option>Agência noticiosa</option><option>Indeterminada</option></select></div>
+<div><label for="typeFilter">Tipo</label><select id="typeFilter"><option>Todos</option><option>Geral</option><option>Política</option><option>Economia</option><option>Agência</option><option>Opinião e política</option><option>Investigação</option><option>Internacional</option></select></div>
+<div><label for="sourceSearch">Pesquisar fonte</label><input id="sourceSearch" placeholder="Nome do jornal"></div>
+</div>
+<p class="muted" id="sourceCount"></p>
+</div>
+<div id="sourceList" class="grid"></div>
+</section>
+<section id="comparar" class="view" hidden>
+<div class="panel">
+<h2 class="section-title">Comparar perspetivas sobre um acontecimento</h2>
+<p class="muted">Introduz o assunto e abre pesquisas em diferentes fontes. Compara o que cada uma relata, as fontes citadas e a diferença entre factos, alegações e opinião.</p>
+<div class="filters">
+<div><label for="compareTopic">Acontecimento / tema</label><input id="compareTopic" placeholder="Ex.: inflação, eleições, conflito"></div>
+<div><label for="compareCountry">País de interesse</label><select id="compareCountry"><option>Todos os países</option><option>Moçambique</option><option>Angola</option><option>Brasil</option><option>Estados Unidos</option></select></div>
+</div>
+<p><button id="compareBtn">Preparar comparação ↗</button></p>
+<div id="compareResults"></div>
+</div>
+<div class="panel">
+<h2 class="section-title">Checklist de leitura crítica</h2>
+<ul>
+<li>O que é facto verificável e o que é interpretação?</li>
+<li>O artigo cita documentos, dados ou testemunhas identificáveis?</li>
+<li>Outras fontes independentes confirmam os pontos centrais?</li>
+<li>O título corresponde ao conteúdo?</li>
+<li>Há contexto importante ou uma resposta da parte criticada que esteja ausente?</li>
+</ul>
+</div>
+</section>
+<section id="favoritos" class="view" hidden>
+<div class="panel"><h2 class="section-title">As tuas fontes favoritas</h2><p class="muted">Os favoritos ficam guardados neste dispositivo e navegador.</p></div>
+<div id="favoriteList" class="grid"></div>
+</section>
+</main>
+<footer>
+<p><strong>Transparência editorial:</strong> as etiquetas ideológicas são indicativas, não são uma classificação de verdade ou qualidade. “Indeterminada” significa que a orientação não foi estabelecida nesta versão. A posição de uma publicação pode variar entre notícias, editoriais e colunistas.</p>
+<p>Versão inicial 1.0 · Notícias do Mundo · Requer ligação à internet para abrir sites e pesquisas.</p>
+</footer>
+<script>
+const SOURCES = [{"country": "Moçambique", "name": "Jornal Notícias", "url": "https://www.jornalnoticias.co.mz/", "orientation": "Indeterminada", "type": "Geral"}, {"country": "Moçambique", "name": "O País", "url": "https://opais.co.mz/", "orientation": "Indeterminada", "type": "Geral"}, {"country": "Moçambique", "name": "Carta de Moçambique", "url": "https://cartamz.com/", "orientation": "Crítica / independente*", "type": "Política"}, {"country": "Moçambique", "name": "Savana", "url": "https://savana.co.mz/", "orientation": "Indeterminada", "type": "Política"}, {"country": "Moçambique", "name": "A Verdade", "url": "https://verdade.co.mz/", "orientation": "Indeterminada", "type": "Geral"}, {"country": "Moçambique", "name": "MMO Notícias", "url": "https://www.mmo.co.mz/", "orientation": "Indeterminada", "type": "Geral"}, {"country": "Moçambique", "name": "Integrity Magazine", "url": "https://integritymagazine.co.mz/", "orientation": "Indeterminada", "type": "Geral"}, {"country": "Moçambique", "name": "AIM — Agência de Informação de Moçambique", "url": "https://aimnews.org/", "orientation": "Agência noticiosa", "type": "Agência"}, {"country": "Moçambique", "name": "STV", "url": "https://stv.co.mz/", "orientation": "Indeterminada", "type": "Televisão"}, {"country": "Moçambique", "name": "Rádio Moçambique", "url": "https://www.rm.co.mz/", "orientation": "Agência/emissora pública", "type": "Rádio"}, {"country": "Angola", "name": "Jornal de Angola", "url": "https://www.jornaldeangola.ao/", "orientation": "Indeterminada", "type": "Geral"}, {"country": "Angola", "name": "Novo Jornal", "url": "https://novojornal.co.ao/", "orientation": "Indeterminada", "type": "Geral"}, {"country": "Angola", "name": "O País", "url": "https://opais.ao/", "orientation": "Indeterminada", "type": "Geral"}, {"country": "Angola", "name": "ANGOP", "url": "https://www.angop.ao/", "orientation": "Agência noticiosa", "type": "Agência"}, {"country": "Angola", "name": "Folha 8", "url": "https://jornalf8.net/", "orientation": "Indeterminada", "type": "Geral"}, {"country": "Angola", "name": "Club-K", "url": "https://www.club-k.net/", "orientation": "Indeterminada", "type": "Geral"}, {"country": "Angola", "name": "Correio da Kianda", "url": "https://correiokianda.info/", "orientation": "Indeterminada", "type": "Geral"}, {"country": "Angola", "name": "Expansão", "url": "https://expansao.co.ao/", "orientation": "Economia", "type": "Economia"}, {"country": "Angola", "name": "Valor Económico", "url": "https://valoreconomico.co.ao/", "orientation": "Economia", "type": "Economia"}, {"country": "Angola", "name": "Ver Angola", "url": "https://www.verangola.net/", "orientation": "Indeterminada", "type": "Geral"}, {"country": "Brasil", "name": "G1", "url": "https://g1.globo.com/", "orientation": "Indeterminada", "type": "Geral"}, {"country": "Brasil", "name": "UOL Notícias", "url": "https://noticias.uol.com.br/", "orientation": "Indeterminada", "type": "Geral"}, {"country": "Brasil", "name": "Folha de S.Paulo", "url": "https://www.folha.uol.com.br/", "orientation": "Indeterminada", "type": "Geral"}, {"country": "Brasil", "name": "Estadão", "url": "https://www.estadao.com.br/", "orientation": "Indeterminada", "type": "Geral"}, {"country": "Brasil", "name": "O Globo", "url": "https://oglobo.globo.com/", "orientation": "Indeterminada", "type": "Geral"}, {"country": "Brasil", "name": "Agência Brasil", "url": "https://agenciabrasil.ebc.com.br/", "orientation": "Agência pública", "type": "Agência"}, {"country": "Brasil", "name": "CNN Brasil", "url": "https://www.cnnbrasil.com.br/", "orientation": "Indeterminada", "type": "Geral"}, {"country": "Brasil", "name": "BBC News Brasil", "url": "https://www.bbc.com/portuguese", "orientation": "Internacional", "type": "Internacional"}, {"country": "Brasil", "name": "Poder360", "url": "https://www.poder360.com.br/", "orientation": "Política", "type": "Política"}, {"country": "Brasil", "name": "Metrópoles", "url": "https://www.metropoles.com/", "orientation": "Indeterminada", "type": "Geral"}, {"country": "Brasil", "name": "Gazeta do Povo", "url": "https://www.gazetadopovo.com.br/", "orientation": "Conservadora / direita*", "type": "Opinião e política"}, {"country": "Brasil", "name": "Revista Oeste", "url": "https://revistaoeste.com/", "orientation": "Conservadora / direita*", "type": "Opinião e política"}, {"country": "Brasil", "name": "Jovem Pan", "url": "https://jovempan.com.br/", "orientation": "Frequentemente associada à direita*", "type": "Notícias e opinião"}, {"country": "Brasil", "name": "Brasil de Fato", "url": "https://www.brasildefato.com.br/", "orientation": "Esquerda / progressista*", "type": "Política e sociedade"}, {"country": "Brasil", "name": "CartaCapital", "url": "https://www.cartacapital.com.br/", "orientation": "Progressista / centro-esquerda*", "type": "Política e sociedade"}, {"country": "Brasil", "name": "The Intercept Brasil", "url": "https://www.intercept.com.br/", "orientation": "Progressista*", "type": "Investigação"}, {"country": "Estados Unidos", "name": "The New York Times", "url": "https://www.nytimes.com/", "orientation": "Indeterminada / liberal em muitos temas*", "type": "Geral"}, {"country": "Estados Unidos", "name": "The Washington Post", "url": "https://www.washingtonpost.com/", "orientation": "Indeterminada / liberal em muitos temas*", "type": "Geral"}, {"country": "Estados Unidos", "name": "The Wall Street Journal", "url": "https://www.wsj.com/", "orientation": "Notícias e opinião devem ser distinguidas*", "type": "Economia"}, {"country": "Estados Unidos", "name": "USA Today", "url": "https://www.usatoday.com/", "orientation": "Indeterminada", "type": "Geral"}, {"country": "Estados Unidos", "name": "Los Angeles Times", "url": "https://www.latimes.com/", "orientation": "Indeterminada", "type": "Geral"}, {"country": "Estados Unidos", "name": "Associated Press (AP)", "url": "https://apnews.com/", "orientation": "Agência noticiosa", "type": "Agência"}, {"country": "Estados Unidos", "name": "Reuters", "url": "https://www.reuters.com/", "orientation": "Agência noticiosa", "type": "Agência"}, {"country": "Estados Unidos", "name": "CNN", "url": "https://www.cnn.com/", "orientation": "Indeterminada / liberal em muitos temas*", "type": "Geral"}, {"country": "Estados Unidos", "name": "NPR", "url": "https://www.npr.org/", "orientation": "Indeterminada / liberal em muitos temas*", "type": "Rádio e notícias"}, {"country": "Estados Unidos", "name": "Politico", "url": "https://www.politico.com/", "orientation": "Política; orientação varia por cobertura", "type": "Política"}, {"country": "Estados Unidos", "name": "Fox News", "url": "https://www.foxnews.com/", "orientation": "Conservadora / direita*", "type": "Notícias e opinião"}, {"country": "Estados Unidos", "name": "New York Post", "url": "https://nypost.com/", "orientation": "Conservadora em muitos temas*", "type": "Geral"}, {"country": "Estados Unidos", "name": "Newsmax", "url": "https://www.newsmax.com/", "orientation": "Conservadora / direita*", "type": "Notícias e opinião"}, {"country": "Estados Unidos", "name": "National Review", "url": "https://www.nationalreview.com/", "orientation": "Conservadora / direita*", "type": "Opinião"}, {"country": "Estados Unidos", "name": "Washington Examiner", "url": "https://www.washingtonexaminer.com/", "orientation": "Conservadora em muitos temas*", "type": "Política"}, {"country": "Estados Unidos", "name": "The Guardian (US)", "url": "https://www.theguardian.com/us", "orientation": "Progressista / centro-esquerda*", "type": "Internacional"}, {"country": "Estados Unidos", "name": "MS NOW", "url": "https://www.ms.now/", "orientation": "Progressista / liberal*", "type": "Notícias e opinião"}, {"country": "Estados Unidos", "name": "HuffPost", "url": "https://www.huffpost.com/", "orientation": "Progressista / liberal*", "type": "Notícias e opinião"}, {"country": "Estados Unidos", "name": "Mother Jones", "url": "https://www.motherjones.com/", "orientation": "Progressista*", "type": "Investigação e opinião"}, {"country": "Estados Unidos", "name": "The Nation", "url": "https://www.thenation.com/", "orientation": "Esquerda / progressista*", "type": "Opinião e política"}];
+const countries = ["Moçambique","Angola","Brasil","Estados Unidos"];
+const flag = {"Moçambique":"🇲🇿","Angola":"🇦🇴","Brasil":"🇧🇷","Estados Unidos":"🇺🇸"};
+const $ = id => document.getElementById(id);
+const orientationMatch = (o, f) => {
+ if(f==="Todas") return true;
+ const x=o.toLowerCase();
+ if(f==="Direita / conservadora") return x.includes("direita")||x.includes("conservadora");
+ if(f==="Centro-direita") return x.includes("centro-direita");
+ if(f==="Centro / mista") return x.includes("centro / mista")||x.includes("mista");
+ if(f==="Centro-esquerda") return x.includes("centro-esquerda");
+ if(f==="Esquerda / progressista") return x.includes("esquerda")||x.includes("progressista");
+ if(f==="Agência noticiosa") return x.includes("agência");
+ if(f==="Indeterminada") return x==="indeterminada"||x.includes("indeterminada");
+ return true;
+};
+function safeUrl(url){try{let u=new URL(url);return ["https:","http:"].includes(u.protocol)?u.href:"#"}catch(e){return "#"}}
+function sourceCard(s){
+ const favs=getFavs(), isFav=favs.includes(s.name);
+ return `<article class="source"><h3>${s.name}</h3><div class="meta"><span class="pill">${flag[s.country]} ${s.country}</span><span class="pill">${s.orientation}</span><span class="pill">${s.type}</span></div><div class="actions"><a href="${safeUrl(s.url)}" target="_blank" rel="noopener">Abrir site ↗</a><button data-fav="${encodeURIComponent(s.name)}">${isFav?"★ Guardado":"☆ Favorito"}</button><button data-search="${encodeURIComponent(s.name)}">Notícias ↗</button></div></article>`;
+}
+function getFavs(){try{return JSON.parse(localStorage.getItem("nm-favs")||"[]")}catch(e){return []}}
+function setFavs(v){localStorage.setItem("nm-favs",JSON.stringify(v))}
+function renderSources(){
+ const country=$("countryFilter").value, orient=$("orientationFilter").value, type=$("typeFilter").value, q=$("sourceSearch").value.toLowerCase().trim();
+ const items=SOURCES.filter(s=>(country==="Todos os países"||s.country===country)&&orientationMatch(s.orientation,orient)&&(type==="Todos"||s.type===type)&&(s.name+" "+s.country+" "+s.orientation+" "+s.type).toLowerCase().includes(q));
+ $("sourceCount").textContent=`${items.length} fontes apresentadas · ${SOURCES.length} fontes no diretório`;
+ $("sourceList").innerHTML=items.length?items.map(sourceCard).join(""):'<div class="empty">Nenhuma fonte corresponde aos filtros.</div>';
+}
+function renderCountries(){
+ $("countryCards").innerHTML=countries.map(c=>`<button class="source" data-country="${c}" style="text-align:left"><h3>${flag[c]} ${c}</h3><p class="muted">${SOURCES.filter(s=>s.country===c).length} fontes no diretório</p><span class="linkbtn">Explorar fontes →</span></button>`).join("");
+}
+function renderFavorites(){
+ const favs=getFavs(), items=SOURCES.filter(s=>favs.includes(s.name));
+ $("favoriteList").innerHTML=items.length?items.map(sourceCard).join(""):'<div class="empty">Ainda não guardaste fontes. Vai a “Jornais e fontes” e escolhe ☆ Favorito.</div>';
+}
+function googleNewsUrl(topic,country,source){
+ const names={"Moçambique":"Mozambique","Angola":"Angola","Brasil":"Brazil","Estados Unidos":"United States"};
+ let q=[topic,source,names[country]||""].filter(Boolean).join(" ");
+ return "https://news.google.com/search?q="+encodeURIComponent(q)+"&hl=pt-PT&gl=MZ&ceid=MZ:pt-PT";
+}
+function doSearch(){
+ const topic=$("topic").value.trim()||"últimas notícias";
+ const country=$("topicCountry").value;
+ window.open(googleNewsUrl(topic,country,""),"_blank","noopener");
+}
+function doCompare(){
+ const topic=$("compareTopic").value.trim();
+ if(!topic){$("compareResults").innerHTML='<p class="notice">Escreve primeiro um acontecimento ou tema.</p>';return}
+ const country=$("compareCountry").value;
+ let items=SOURCES.filter(s=>country==="Todos os países"||s.country===country);
+ // Choose a spread of editorial profiles where available, plus indeterminate/agencies.
+ const chosen=[];
+ const wanted=["direita","conservadora","progressista","esquerda","agência","indeterminada"];
+ for(const term of wanted){
+   const s=items.find(x=>!chosen.some(y=>y.name===x.name)&&x.orientation.toLowerCase().includes(term));
+   if(s)chosen.push(s);
+ }
+ for(const s of items){if(chosen.length>=8)break;if(!chosen.some(x=>x.name===s.name))chosen.push(s)}
+ $("compareResults").innerHTML='<h3 class="section-title">Pesquisar o tema em fontes diferentes</h3><p class="muted">Cada botão abre uma pesquisa de notícias para o tema escolhido. As etiquetas ideológicas são aproximadas e não garantem que cada artigo represente a linha editorial geral.</p><div class="grid">'+chosen.map(s=>`<article class="source"><h3>${s.name}</h3><div class="meta"><span class="pill">${s.country}</span><span class="pill">${s.orientation}</span></div><a class="linkbtn" target="_blank" rel="noopener" href="${googleNewsUrl(topic,s.country,s.name)}">Ver cobertura ↗</a></article>`).join("")+'</div>';
+}
+document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>{
+ document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("active",x===b));
+ document.querySelectorAll(".view").forEach(x=>x.hidden=x.id!==b.dataset.view);
+ if(b.dataset.view==="favoritos")renderFavorites();
+ if(b.dataset.view==="fontes")renderSources();
+ window.scrollTo({top:0,behavior:"smooth"});
+}));
+["countryFilter","orientationFilter","typeFilter","sourceSearch"].forEach(id=>$(id).addEventListener("input",renderSources));
+$("searchNews").addEventListener("click",doSearch);
+$("compareBtn").addEventListener("click",doCompare);
+$("topic").addEventListener("keydown",e=>{if(e.key==="Enter")doSearch()});
+$("compareTopic").addEventListener("keydown",e=>{if(e.key==="Enter")doCompare()});
+document.addEventListener("click",e=>{
+ const c=e.target.closest("[data-country]");
+ if(c){$("countryFilter").value=c.dataset.country;document.querySelector('[data-view="fontes"]').click();renderSources();return}
+ const f=e.target.closest("[data-fav]");
+ if(f){const name=decodeURIComponent(f.dataset.fav), favs=getFavs();setFavs(favs.includes(name)?favs.filter(x=>x!==name):[...favs,name]);renderSources();renderFavorites();return}
+ const s=e.target.closest("[data-search]");
+ if(s){const name=decodeURIComponent(s.dataset.search);window.open(googleNewsUrl("", "",name),"_blank","noopener")}
+});
+renderCountries();renderSources();renderFavorites();
+if("serviceWorker" in navigator && location.protocol.startsWith("http"))window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js").catch(()=>{}));
+</script>
+</body>
+</html>
